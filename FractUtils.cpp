@@ -13,42 +13,32 @@ const int DIV = 4;
 frac mixToImp(Mfrac f)
 {
 	frac tmp;
-	int sign,tmp1;
-	/*if ((f.tot || f.den || f.num ) < 0)
-	{
-		sign = -1;
-	}
-	if (((f.tot&&f.den) || (f.den&&f.num) || (f.tot&&f.num) < 0) || ((f.tot&&f.den&&f.num) < 0))
-	{
-		sign = 1;
-	}
-	if ((f.tot || f.den || f.num) >= 0)
-	{
-		sign = 1;
-	}*/
-	/*tmp1 = f.tot*f.num*f.den;//если чтото из них ноль
-	if (tmp1 < 0)
-	{
-		
+	int sign;
+
+	if (f.tot == 0){
+		tmp.num = f.num;
+		tmp.den = abs(f.den);
 	}
 	else
 	{
-		sign = 1;
-	}*/
-
-	if 
-
-	tmp.num =sign*(f.num);//а что если числитель уже с минусом?, всё похерится, надо чёто другое придумать
-	tmp.den = f.den;
-	return simplify(tmp);
+		sign = f.tot / (abs(f.tot));
+		if (f.num){
+			tmp.num = sign*(abs(f.den*f.tot) + f.num);
+			tmp.den = abs(f.den);
+		}
+		else{
+			tmp.num = sign*f.tot;
+			tmp.den = 1;
+		}
+	};
+	return tmp;
 }
 void lcf(frac* f1, frac* f2) //Приводит к общему знаменателю
 {
-	if (f1->den == f2->den)
+	if ((f1->den == f2->den) && (!f1->den || !f2->den))
 	{
 		return;
 	}
-
 	int d1 = f1->den;
 	int d2 = f2->den;
 
@@ -72,7 +62,7 @@ int gcd(int a, int b)//Наибольший общий делитель
 }
 frac simplify(frac f)//Упрощение дроби
 {
-	int negative = (f.num*f.den<0);
+	int negative = (f.num*f.den < 0);
 
 	f.num = abs(f.num);
 	f.den = abs(f.den);  //!!!!!!!!
@@ -80,7 +70,7 @@ frac simplify(frac f)//Упрощение дроби
 	if (f.num == 0){
 		f.den = 1;
 		return f;
-}
+	}
 	int lpcf; // Largest Possible Common Factor максимально возможный общий множитель
 	lpcf = gcd(f.den, f.num); // !!!!
 	f.den /= lpcf; // !!!!!!!!!!
@@ -122,24 +112,24 @@ int parse(FILE *f)
 	do
 	{
 		fscanf(f, "%c", &c);
-	} while (!(determine(c) != 0) && (c != '\0')&&!(feof(f)));
+	} while (!(determine(c) != 0) && (c != '\0') && !(feof(f)));
 	return (determine(c));
 };
-int  scanMFrac(Mfrac *tmp,FILE *f){//Чё возвращает то ?
-
-	int t = fscanf(f, "%d.%d:%d", &(tmp->tot), &(tmp->num), &(tmp->den));
-	if ((tmp->num||tmp->den)==0)
-	{
-		printf("Sike! That's tho rong number!");
-			return 0;
-	}
-	return t;// int ретёрнится, где дробь Mfrac?
+int  scanMFrac(Mfrac *tmp, FILE *f){//Чё возвращает то ?
+	int t = fscanf(f, "%d.%d", &(tmp->tot), &(tmp->num));
+	if (tmp->num){//Если что-либо считалось и числитель не равен нулю, то имеет смысл считывать знаменатель.
+		fscanf(f, " :%d", &(tmp->den));
+		if (!tmp->den){
+			tmp->den = EMPTY_DEN; //Маркер пустого знаменателя. 
+		}
+	};
+	return t;
 
 };
 Mfrac toMix(frac f){
 	Mfrac tmp;
 	tmp.den = f.den;
-	tmp.tot =f.num / f.den;
+	tmp.tot = f.num / f.den;
 	tmp.num = f.num % f.den;
 	return tmp;
 };
@@ -150,8 +140,8 @@ void scanFrac(frac *a, FILE *in){
 }
 void printFrac(frac a, FILE *f){
 	Mfrac tmp = toMix(a);
-	fprintf(f,"%d.%d", tmp.tot, tmp.num);
+	fprintf(f, "%d.%d", tmp.tot, tmp.num);
 	if (tmp.num)
-	fprintf(f, ":%d", tmp.den);
+		fprintf(f, ":%d", tmp.den);
 	printf("  ");
 }
